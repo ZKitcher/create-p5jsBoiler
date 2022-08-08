@@ -2,6 +2,7 @@ let demo;
 
 function setup() {
     createCanvas(window.innerWidth, window.innerHeight);
+
     demo = new Demo();
 }
 
@@ -17,17 +18,20 @@ const run = () => {
     // RUN objects here
     demo.run();
 
+    render()
+}
+
+const render = () => {
     renderText();
 }
 
 const renderText = () => {
     // Render text at the bottom left of the screen.
-    const textLabel = [
-        `Framerate : ${frameRate().toFixed(0)}`,
-    ];
     push();
     fill('#FFF');
-    textLabel.reverse().forEach((e, i) => { text(e, 10, height - (13 * (i + 1))); });
+    [
+        `Framerate : ${frameRate().toFixed(0)}`,
+    ].reverse().forEach((e, i) => { text(e, 10, height - (13 * (i + 1))); });
     pop();
 }
 
