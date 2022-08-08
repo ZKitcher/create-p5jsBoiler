@@ -31,7 +31,7 @@ const renderText = () => {
     fill('#FFF');
     [
         `Framerate : ${frameRate().toFixed(0)}`,
-    ].reverse().forEach((e, i) => { text(e, 10, height - (13 * (i + 1))); });
+    ].reverse().forEach((e, i) => text(e, 10, height - (13 * (i + 1))));
     pop();
 }
 
