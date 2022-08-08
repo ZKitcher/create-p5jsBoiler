@@ -33,7 +33,7 @@ const renderText = () => {
 
 function keyPressed() {
     // Switch case for key pressed event listeners.
-    switch (key) {
+    switch (key.toLowerCase()) {
         case 'c':
             createCanvas(window.innerWidth, window.innerHeight);
             break;
