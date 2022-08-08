@@ -4,7 +4,8 @@ const urlTree = [
         extension: 'js',
         endpoint: [
             /* Class names here */
-            'demo'
+            'ship',
+            'missile',
         ]
     },
     {

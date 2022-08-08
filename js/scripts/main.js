@@ -1,9 +1,10 @@
-let demo;
+
+let ship;
 
 function setup() {
     createCanvas(window.innerWidth, window.innerHeight);
+    ship = new Ship();
 
-    demo = new Demo();
 }
 
 function draw() {
@@ -16,7 +17,7 @@ function draw() {
 
 const run = () => {
     // RUN objects here
-    demo.run();
+    ship.run();
 
     render()
 }
