@@ -36,7 +36,7 @@ class Ship extends NEATAgent {
             this.fire(missiles);
         }
 
-        networkPrediction(missiles, opShips)
+        //this.networkPrediction(missiles, opShips)
         this.update()
         this.velocity.mult(0.99);
         this.render()
@@ -55,16 +55,17 @@ class Ship extends NEATAgent {
 
 
     networkPrediction(missiles, opShips, asteroids) {
-        opShips = this.find(e => e.id !== this.id);
+        opShips = opShips.find(e => e.id !== this.id);
+
+        //minValue(missiles.filter(e => e.id !== this.id).map(e => dist(e.position.x, e.position.y, this.position.x, this.position.y)))
 
         let inputs = [
-            this.position.x / width, this.position.y / height, 
-            opShips.position.x / width, opShips.position.y / height,
-            minValue(missiles.filter(e => e.id !== this.id).map(e => dist(e.position.x, e.position.y, this.position.x, this.position.y))),
+            this.heading,
+            this.position.x / width, 
+            this.position.y / height, 
+            opShips.position.x / width, 
+            opShips.position.y / height,
         ];
-
-        
-
 
     }
 
