@@ -1,57 +1,85 @@
-class Missile {
-    constructor(x, y, a) {
-        this.position = createVector(x, y);
-        this.velocity = createVector(0, 0);
-        this.acceleration = createVector(0, 0);
-        this.angle = a;
-        this.currentAcceleration = 0.5;
+class Missile extends Entity {
+    constructor(pos, vel, a, id) {
+        super(pos.x, pos.y, 4);
+
         this.time = 3 * 60;
+        this.position = createVector(pos.x, pos.y);;
+        this.velocity = p5.Vector.fromAngle(a);
+        this.velocity.mult(10);
+        this.velocity.add(vel);
+
+        this.width = 2;
+        this.height = 10;
+
+        this.armed = 5;
+        this.blownUp = false;
+
+        this.id = id;
     }
 
     run() {
+        this.armed--;
+
         this.update();
         this.render();
     }
 
-    getPos() {
-        return this.position.copy();
+
+    hits(asteroid) {
+        if (this.armed > 0) return;
+
+        let dist2 = (this.position.x - asteroid.position.x) * (this.position.x - asteroid.position.x)
+            + (this.position.y - asteroid.position.y) * (this.position.y - asteroid.position.y);
+
+
+        if (dist2 <= asteroid.rmin2) {
+            this.blownUp = true;
+            return true;
+        }
+        if (dist2 >= asteroid.rmax2) {
+            return false;
+        }
+
+        if (!(asteroid instanceof Asteroid)) return false;
+
+        var last_pos = p5.Vector.sub(this.position, this.velocity);
+        var asteroid_vertices = asteroid.vertices();
+        for (var i = 0; i < asteroid_vertices.length - 1; i++) {
+            if (lineIntersect(last_pos,
+                this.position,
+                asteroid_vertices[i],
+                asteroid_vertices[i + 1])) {
+                this.blownUp = true;
+                return true;
+            }
+        }
+
+        if (lineIntersect(last_pos,
+            this.position,
+            asteroid_vertices[0],
+            asteroid_vertices[asteroid_vertices.length - 1])) {
+            this.blownUp = true;
+            return true;
+        }
+        return false;
     }
 
-    update() {
-        this.time--;
-        this.adjustVelocity(this.currentAcceleration)
-        this.velocity.add(this.acceleration);
-        this.position.add(this.velocity);
-        this.acceleration = createVector(0, 0);
-    }
-
-    adjustVelocity(accel = this.currentAcceleration) {
-        this.acceleration
-            .add(
-                this.vectBodyToWorld(
-                    createVector(0, accel),
-                    this.angle
-                )
-            );
-    }
-
-    vectBodyToWorld(vect, ang) {
-        let v = vect.copy();
-        let vn = createVector(
-            v.x * cos(ang) - v.y * sin(ang),
-            v.x * sin(ang) + v.y * cos(ang)
-        );
-        return vn;
+    offscreen() {
+        if (this.position.x > width || this.position.x < 0) {
+            return true;
+        }
+        if (this.position.y > height || this.position.y < 0) {
+            return true;
+        }
+        return false;
     }
 
     render() {
         push();
-        fill(10, 10, 10, 127);
         rectMode(CENTER);
-        stroke(200);
         translate(this.position.x, this.position.y);
-        rotate(this.angle);
+        rotate(this.velocity.heading() + PI / 2);
         rect(0, 0, 2, 10, 3)
-        pop()
+        pop();
     }
 }

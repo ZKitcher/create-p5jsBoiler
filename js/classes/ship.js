@@ -1,134 +1,152 @@
 class Ship extends NEATAgent {
-    constructor() {
-        super()
-
-        this.turnRate = 0.08;
-        this.gripStatic = 0.3;
-        this.position = createVector(width / 2, height / 2);
+    constructor(brain, pos = createVector(rand(width), rand(height)), r = 20) {
+        super(brain);
+        this.position = createVector(pos.x, pos.y);
+        this.r = r;
+        this.heading = 1;
+        this.rotation = 0;
         this.velocity = createVector(0, 0);
-        this.acceleration = createVector(0, 0);
-        this.angle = -1.56;
-        this.mass = 10;
-        this.currentAcceleration = 0.15;
-        this.trail = [];
+        this.accelMagnitude = 0;
 
-        this.missiles = [];
+        this.rmax = 4 / 3 * this.r;
+        this.rmax2 = this.rmax * this.rmax;
+        this.rmin2 = this.r * this.r;
+        this.fireTimeout = 30;
 
-        this.firedAMissile = 0;
+        this.id = rand()
     }
 
-    run() {
-        this.update();
-        this.render();
-    }
+    run(missiles, opShips, asteroids) {
+        if (this.done) return;
 
-    getPos() {
-        return this.position.copy();
+        this.fireTimeout--;
+
+        if (keyIsDown(UP_ARROW)) {
+            this.setAccel(0.1);
+        } else {
+            this.setAccel(0);
+        }
+        if (keyIsDown(LEFT_ARROW)) {
+            this.heading += -0.08;
+        }
+        if (keyIsDown(RIGHT_ARROW)) {
+            this.heading += 0.08;
+        }
+        if (keyIsDown(32)) {
+            this.fire(missiles);
+        }
+
+        networkPrediction(missiles, opShips)
+        this.update()
+        this.velocity.mult(0.99);
+        this.render()
     }
 
     update() {
-        if (this.done) return;
+        this.heading += this.rotation;
 
-        if (this.position.x < 0 || this.position.y < 0 || this.position.x > width || this.position.y > height) {
-            this.failed = true;
-            this.done = true;
-        }
+        var force = p5.Vector.fromAngle(this.heading);
+        force.mult(this.accelMagnitude);
+        this.velocity.add(force);
 
-        this.firedAMissile--;
-        
-        if (keyIsPressed) {
-            if (keyIsDown(UP_ARROW)) {
-                this.adjustVelocity(this.currentAcceleration)
-            }
-            if (keyIsDown(DOWN_ARROW)) {
-                this.adjustVelocity(-this.currentAcceleration)
-            }
-            if (keyIsDown(LEFT_ARROW)) {
-                this.angle -= this.turnRate;
-            }
-            if (keyIsDown(RIGHT_ARROW)) {
-                this.angle += this.turnRate;
-            }
-            if (keyIsDown(32)) {
-                this.fire();
-            }
-        }
-
-        this.trail.push({
-            position: this.getPos(),
-        });
-
-        if (this.trail.length > 400) {
-            this.trail.shift()
-        }
-
-        let vB = this.vectWorldToBody(this.velocity, this.angle);
-        let bodyFixedDrag;
-        bodyFixedDrag = createVector(vB.x * -this.gripStatic, vB.y * 0.05);
-        let worldFixedDrag = this.vectBodyToWorld(bodyFixedDrag, this.angle)
-        this.acceleration.add(worldFixedDrag.div(this.mass));
-        this.angle = this.angle % TWO_PI;
-        this.velocity.add(this.acceleration);
         this.position.add(this.velocity);
-        this.acceleration = createVector(0, 0);
+        this.edges();
+    }
 
-        this.missiles.forEach(e => e.run())
-        this.missiles = this.missiles.filter(e => e.time > 1)
+
+    networkPrediction(missiles, opShips, asteroids) {
+        opShips = this.find(e => e.id !== this.id);
+
+        let inputs = [
+            this.position.x / width, this.position.y / height, 
+            opShips.position.x / width, opShips.position.y / height,
+            minValue(missiles.filter(e => e.id !== this.id).map(e => dist(e.position.x, e.position.y, this.position.x, this.position.y))),
+        ];
+
+        
+
 
     }
 
-    adjustVelocity(accel = this.currentAcceleration) {
-        this.acceleration
-            .add(
-                this.vectBodyToWorld(
-                    createVector(0, accel),
-                    this.angle
-                )
-            );
+
+    setAccel(magnitude) {
+        this.accelMagnitude = magnitude;
     }
 
-    vectBodyToWorld(vect, ang) {
-        let v = vect.copy();
-        let vn = createVector(
-            v.x * cos(ang) - v.y * sin(ang),
-            v.x * sin(ang) + v.y * cos(ang)
-        );
-        return vn;
+    edges() {
+        if (this.position.x > width + this.rmax) {
+            this.position.x = -this.rmax;
+        } else if (this.position.x < -this.rmax) {
+            this.position.x = width + this.rmax;
+        }
+        if (this.position.y > height + this.rmax) {
+            this.position.y = -this.rmax;
+        } else if (this.position.y < -this.rmax) {
+            this.position.y = height + this.rmax;
+        }
     }
 
-    vectWorldToBody(vect, ang) {
-        let v = vect.copy();
-        let vn = createVector(
-            v.x * cos(ang) + v.y * sin(ang),
-            v.x * sin(ang) - v.y * cos(ang)
-        );
-        return vn;
+    setRotation(rot) {
+        this.rotation = rot;
     }
 
-    fire() {
-        if (this.firedAMissile > 0) return;
-        this.firedAMissile = 30;
-        this.missiles.push(new Missile(this.position.x, this.position.y, this.angle))
+    fire(missiles) {
+        if (this.fireTimeout > 0) return;
+        this.fireTimeout = 30;
+        missiles.push(new Missile(this.position, this.velocity, this.heading, this.id));
+    }
+
+    hits(asteroid) {
+        let dist2 = (this.position.x - asteroid.position.x) * (this.position.x - asteroid.position.x)
+            + (this.position.y - asteroid.position.y) * (this.position.y - asteroid.position.y);
+        if (dist2 >= (asteroid.rmax + this.rmax2) * (asteroid.rmax + this.rmax2)) {
+            return false;
+        }
+        if (dist2 <= asteroid.rmin2) {
+            return true;
+        }
+
+        var vertices = [
+            createVector(-2 / 3 * this.r, this.r).rotate(this.heading),
+            createVector(-2 / 3 * this.r, -this.r).rotate(this.heading),
+            createVector(4 / 3 * this.r, 0).rotate(this.heading)
+        ];
+        for (var i = 0; i < vertices.length; i++) {
+            vertices[i] = p5.Vector.add(vertices[i], this.position);
+        }
+
+        var asteroid_vertices = asteroid.vertices();
+
+        for (var i = 0; i < asteroid_vertices.length; i++) {
+            for (var j = 0; j < vertices.length; j++) {
+                var next_i = (i + 1) % asteroid_vertices.length;
+                if (lineIntersect(vertices[j], vertices[(j + 1) % vertices.length],
+                    asteroid_vertices[i], asteroid_vertices[next_i])) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     render() {
         push();
-        fill(100, 100, 100, 127);
-        rectMode(CENTER);
-        stroke(200);
         translate(this.position.x, this.position.y);
-        rotate(this.angle);
-        rect(0, 0, 10, 20, 3)
-        strokeWeight(3)
-        point(4, 10)
-        point(-4, 10)
-        pop()
+        rotate(this.heading);
+        fill(0);
+        triangle(-2 / 3 * this.r, -this.r,
+            -2 / 3 * this.r, this.r,
+            4 / 3 * this.r, 0);
 
-        push();
-        for (let p of this.trail) {
-            stroke(255);
-            point(p.position.x, p.position.y);
+        if (this.accelMagnitude != 0) {
+            translate(-this.r, 0);
+            rotate(random(PI / 4, 3 * PI / 4));
+            line(0, 0, 0, 10);
         }
-        pop()
+        pop();
     }
+}
+
+class Agent extends Ship {
+
 }
