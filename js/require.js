@@ -1,5 +1,15 @@
 const urlTree = [
     {
+        baseURL: 'NeuralNetwork',
+        extension: 'js',
+        endpoint: [
+            'math',
+            'neuralNetwork',
+            'population',
+            'quadtree',
+        ]
+    },
+    {
         baseURL: 'js/classes',
         extension: 'js',
         endpoint: [

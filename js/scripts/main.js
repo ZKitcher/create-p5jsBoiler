@@ -1,9 +1,13 @@
 
-let room;
+let rooms = [];
+let starships;
+
 function setup() {
     createCanvas(window.innerWidth, window.innerHeight);
-    room = new Room();
 
+    starships = new NEATPopulation(Ship, 100);
+    starships.styling.fontColour = '#FFF';
+    buildRooms();
 }
 
 function draw() {
@@ -16,7 +20,15 @@ function draw() {
 
 const run = () => {
     // RUN objects here
-    room.run();
+    starships.runTimer()
+    starships.render();
+
+    rooms.forEach(e => e.run())
+    rooms.find(e => e.topRoom === true && e.completed === false)?.render() || rooms.find(e => e.completed === false)?.render()
+
+    if (starships.checkDone()) {
+        buildRooms();
+    }
 
     render()
 }
@@ -62,4 +74,19 @@ const lineIntersect = (l1v1, l1v2, l2v1, l2v2) => {
 
 const cross = (v1, v2) => {
     return v1.x * v2.y - v2.x * v1.y;
+}
+
+const createNEATGenome = () => new NEATGenome(22, 3, rand());
+const completedGeneration = () => { buildRooms(); };
+
+const buildRooms = () => {
+    rooms = [];
+    for (var i = 0; i < starships.popSize / 2; i++) {
+        rooms.push(
+            new Room(
+                [starships.agents[i], starships.agents[starships.popSize / 2 + i]],
+                i,
+                (starships.agents[i].topAgent || starships.agents[starships.popSize / 2 + i].topAgent)
+            ));
+    }
 }

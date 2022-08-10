@@ -1,39 +1,36 @@
 class Room {
-    constructor(ships = [new Ship()/*, new Ship()*/]) {
+    constructor(ships = [new Ship(), new Ship()], id, topRoom) {
         this.ships = ships;
-        this.asteroids = [];
         this.missiles = [];
-        this.spawnAsteroids()
 
         this.completed = false;
 
+        this.id = id;
+
         this.winner = null;
+
+        this.topRoom = topRoom;
     }
 
     run() {
-        this.ships.forEach(e => e.run(this.missiles, this.ships, this.asteroids))
-        this.asteroids.forEach(e => e.run())
         this.missiles.forEach(e => e.run())
+        this.ships.forEach(e => e.run(this.missiles, this.ships))
+
+        this.collisionCheck();
 
         if (this.ships.find(e => e.done)) {
             this.completed = true;
         }
-
     }
 
     collisionCheck() {
         for (let i = 0; i < this.missiles.length; i++) {
-            this.asteroids.forEach((f, j) => {
-                if (this.missiles[i].hits(f)) {
-                    let newAsteroids = this.asteroids[j].breakup();
-                    this.asteroids = this.asteroids.concat(newAsteroids);
-                    this.asteroids.splice(j, 1);
-                }
-            })
-
             this.ships.forEach((f) => {
-                if (this.missiles[i].hits(f)) {
-                    f.done = true;
+                if (f.shield < 0 && this.missiles[i].hits(f)) {
+                    f.failed = true;
+                    this.missiles[i].success = true;
+                    f.score += 1000;
+                    this.ships.forEach(g => g.done = true)
                 }
             })
 
@@ -42,20 +39,11 @@ class Room {
                 i--;
             }
         }
-
-        for (let i = 0; i < this.ships.length; i++) {
-            this.asteroids.forEach((f) => {
-                if (this.ships[i].hits(f)) {
-                    this.ships[i].done = true;
-                }
-            })
-        }
     }
 
-    spawnAsteroids() {
-        for (var i = 0; i < 5; i++) {
-            this.asteroids.push(new Asteroid());
-        }
+    render(){
+        this.missiles.forEach(e => e.render())
+        this.ships.forEach(e => e.render())
     }
 
 }

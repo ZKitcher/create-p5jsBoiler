@@ -15,13 +15,19 @@ class Missile extends Entity {
         this.blownUp = false;
 
         this.id = id;
+
+        this.trail = [];
     }
 
     run() {
         this.armed--;
 
+        this.trail.push(this.position.copy())
+
+        if (this.trail.length > 10) this.trail.shift()
+
         this.update();
-        this.render();
+        //this.render();
     }
 
 
@@ -31,7 +37,6 @@ class Missile extends Entity {
         let dist2 = (this.position.x - asteroid.position.x) * (this.position.x - asteroid.position.x)
             + (this.position.y - asteroid.position.y) * (this.position.y - asteroid.position.y);
 
-
         if (dist2 <= asteroid.rmin2) {
             this.blownUp = true;
             return true;
@@ -40,27 +45,27 @@ class Missile extends Entity {
             return false;
         }
 
-        if (!(asteroid instanceof Asteroid)) return false;
+        // if (!(asteroid instanceof Asteroid)) return false;
 
-        var last_pos = p5.Vector.sub(this.position, this.velocity);
-        var asteroid_vertices = asteroid.vertices();
-        for (var i = 0; i < asteroid_vertices.length - 1; i++) {
-            if (lineIntersect(last_pos,
-                this.position,
-                asteroid_vertices[i],
-                asteroid_vertices[i + 1])) {
-                this.blownUp = true;
-                return true;
-            }
-        }
+        // var last_pos = p5.Vector.sub(this.position, this.velocity);
+        // var asteroid_vertices = asteroid.vertices();
+        // for (var i = 0; i < asteroid_vertices.length - 1; i++) {
+        //     if (lineIntersect(last_pos,
+        //         this.position,
+        //         asteroid_vertices[i],
+        //         asteroid_vertices[i + 1])) {
+        //         this.blownUp = true;
+        //         return true;
+        //     }
+        // }
 
-        if (lineIntersect(last_pos,
-            this.position,
-            asteroid_vertices[0],
-            asteroid_vertices[asteroid_vertices.length - 1])) {
-            this.blownUp = true;
-            return true;
-        }
+        // if (lineIntersect(last_pos,
+        //     this.position,
+        //     asteroid_vertices[0],
+        //     asteroid_vertices[asteroid_vertices.length - 1])) {
+        //     this.blownUp = true;
+        //     return true;
+        // }
         return false;
     }
 
@@ -78,8 +83,16 @@ class Missile extends Entity {
         push();
         rectMode(CENTER);
         translate(this.position.x, this.position.y);
-        rotate(this.velocity.heading() + PI / 2);
-        rect(0, 0, 2, 10, 3)
+        strokeWeight(8)
+        stroke(255, 0, 0);
+        point(0, 0)
+        pop();
+
+        push();
+        for (let p of this.trail) {
+            stroke(255);
+            point(p.x, p.y);
+        }
         pop();
     }
 }

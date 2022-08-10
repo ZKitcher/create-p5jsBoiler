@@ -13,13 +13,16 @@ class Ship extends NEATAgent {
         this.rmin2 = this.r * this.r;
         this.fireTimeout = 30;
 
-        this.id = rand()
+        this.shield = 120;    
+
+        this.colour = [rand(100, 255), rand(100, 255), rand(100, 255)]
     }
 
     run(missiles, opShips, asteroids) {
         if (this.done) return;
 
-        this.fireTimeout--;
+        if (this.fireTimeout > 0) this.fireTimeout--;
+        this.shield--;
 
         if (keyIsDown(UP_ARROW)) {
             this.setAccel(0.1);
@@ -36,37 +39,92 @@ class Ship extends NEATAgent {
             this.fire(missiles);
         }
 
-        //this.networkPrediction(missiles, opShips)
+        this.score++;
+
+        if (this.score > 30 && this.velocity > 1) {
+            this.done = true;
+            this.failed = true;
+        }
+
+        this.networkPrediction(missiles, opShips, asteroids)
         this.update()
         this.velocity.mult(0.99);
-        this.render()
+        //this.render()
     }
 
     update() {
         this.heading += this.rotation;
 
         var force = p5.Vector.fromAngle(this.heading);
-        force.mult(this.accelMagnitude);
-        this.velocity.add(force);
+
+        if (!isNaN(this.accelMagnitude) && this.accelMagnitude !== 0) {
+            force.mult(this.accelMagnitude);
+            this.velocity.add(force);
+        }
 
         this.position.add(this.velocity);
         this.edges();
     }
 
 
-    networkPrediction(missiles, opShips, asteroids) {
-        opShips = opShips.find(e => e.id !== this.id);
+    networkPrediction(missiles, opShips) {
+        let op = opShips.find(e => e.brain.id !== this.brain.id);
 
-        //minValue(missiles.filter(e => e.id !== this.id).map(e => dist(e.position.x, e.position.y, this.position.x, this.position.y)))
+        let missile = missiles.filter(e => e.id !== this.brain.id)
+            .sort((a, b) =>
+                dist(a.position.x, a.position.y, this.position.x, this.position.y) -
+                dist(b.position.x, b.position.y, this.position.x, this.position.y)
+            ) ?? {
+            heading: 0,
+            position: {
+                x: 0,
+                y: 0
+            }
+        };
+
+        if (missile.length > 5) {
+            missile = missile.slice(0, 5);
+        } else {
+            while (missile.length < 5) {
+                missile.push({
+                    heading: 0,
+                    position: {
+                        x: 0,
+                        y: 0
+                    }
+                })
+            }
+        }
 
         let inputs = [
             this.heading,
-            this.position.x / width, 
-            this.position.y / height, 
-            opShips.position.x / width, 
-            opShips.position.y / height,
+            this.position.x / width,
+            this.position.y / height,
+            this.fireTimeout / 30,
+
+            op.heading,
+            op.position.x / width,
+            op.position.y / height,
+
         ];
 
+        inputs = inputs.concat(missile.map(e => [
+            e.heading,
+            e.position.x / width,
+            e.position.y / height,
+        ])).flat()
+
+        this.prediction = this.brain.predict(inputs);
+
+        this.prediction[0] = between(this.prediction[0], -1, 1);
+        this.prediction[1] = between(this.prediction[0], -1, 1);
+        this.prediction[2] = between(this.prediction[0], -1, 1);
+
+        this.setAccel(this.prediction[0] * 0.1);
+        this.heading += this.prediction[1] * 0.08;
+        if (this.prediction[2] > 0) {
+            this.fire(missiles);
+        }
     }
 
 
@@ -130,11 +188,24 @@ class Ship extends NEATAgent {
         return false;
     }
 
+    calculateFitness() {
+        this.fitness = this.score;
+
+        if (this.failed === true || this.success === false) this.fitness /= 2;
+
+        if (this.success) this.fitness += this.fitness * 0.2;
+    }
+
     render() {
         push();
         translate(this.position.x, this.position.y);
         rotate(this.heading);
-        fill(0);
+        this.shield > 0 ? fill(100, 100, 255) : fill(this.colour);
+        
+        if(this.topAgent){
+            fill(0, 0, 0)
+        }
+
         triangle(-2 / 3 * this.r, -this.r,
             -2 / 3 * this.r, this.r,
             4 / 3 * this.r, 0);
@@ -146,8 +217,4 @@ class Ship extends NEATAgent {
         }
         pop();
     }
-}
-
-class Agent extends Ship {
-
 }

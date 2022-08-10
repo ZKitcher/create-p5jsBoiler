@@ -24,7 +24,7 @@ class Asteroid extends Entity {
 
     run() {
         this.update();
-        this.render();
+        //this.render();
     }
 
     breakup() {
