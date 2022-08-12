@@ -13,12 +13,11 @@ const runCommand = command => {
 }
 
 const repoName = process.argv[2];
-const gitCheckouCommand = `git clone --depth 1 https://github.com/ZKitcher/p5js-Boilerplate  ${repoName}`;
-// const installDepsCommand = `cd ${repoName} && npm install`;
+const gitCheckouCommand = `git clone --depth 1 https://github.com/ZKitcher/p5js-Boilerplate ${repoName}`;
 
 console.log(`Cloning the Repo with the name ${repoName}`);
-const checkedOut = runCommand(gitCheckouCommand);
 
-if(!checkedOut) precess.exit(-1);
+const checkedOut = runCommand(gitCheckouCommand);
+if (!checkedOut) process.exit(-1);
 
 console.log('Done')
