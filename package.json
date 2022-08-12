@@ -4,6 +4,6 @@
     "bin": "./bin/cli.js",
     "scripts": {
         "build": "node fileScraper.js",
-        "publish": "npm publish --access=public"
+        "packet": "npm publish --access=public"
     }
 }
