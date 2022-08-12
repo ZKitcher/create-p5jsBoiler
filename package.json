@@ -1,0 +1,8 @@
+{
+    "name": "p5js-boilerplate",
+    "version": "0.1.0",
+    "private": false,
+    "scripts": {
+        "build": "node fileScraper.js"
+    }
+}

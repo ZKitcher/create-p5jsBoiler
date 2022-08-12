@@ -1,1 +1,0 @@
-const urlTree = ["js/classes/demo.js","js/scripts/main.js"];urlTree.forEach(b=>{var a=document.createElement("script");a.src=b,a.defer=!0,document.head.appendChild(a)})

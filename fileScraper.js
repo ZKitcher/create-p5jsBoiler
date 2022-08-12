@@ -1,15 +1,11 @@
 const path = require('path');
 const fs = require('fs');
 
-const directoryPath = path.join(__dirname, 'js');
-var res = []
+const directoryPath = path.join(__dirname, 'src');
+let res = []
 const getFiles = async (dirPath) => {
     fs.readdir(dirPath, function (err, files) {
-
-        if (err) {
-            return console.log('Unable to scan directory: ' + err);
-        }
-
+        if (err) return console.log('Unable to scan directory: ' + err);
 
         files.forEach(function (file) {
             if (!file.match(/\./)) {
@@ -21,7 +17,7 @@ const getFiles = async (dirPath) => {
                         .substring(1)
                 )
                 const json = JSON.stringify(res);
-                fs.writeFileSync('require.js', `const urlTree = ${json};urlTree.forEach(b=>{var a=document.createElement("script");a.src=b,a.defer=!0,document.head.appendChild(a)})`);
+                fs.writeFileSync('_require.js', `${json}.forEach(b=>{var a=document.createElement("script");a.src=b,a.defer=!0,document.head.appendChild(a)})`);
             }
         });
     });
