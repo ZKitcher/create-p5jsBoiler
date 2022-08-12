@@ -12,7 +12,7 @@ const runCommand = command => {
     return true;
 }
 
-const repoName = precess.argv[2];
+const repoName = process.argv[2];
 const gitCheckouCommand = `git clone --depth 1 https://github.com/ZKitcher/p5js-Boilerplate  ${repoName}`;
 // const installDepsCommand = `cd ${repoName} && npm install`;
 

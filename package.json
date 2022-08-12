@@ -1,5 +1,5 @@
 {
-    "name": "@zkitch/create-p5jsboiler",
+    "name": "create-p5jsboiler",
     "version": "0.1.0",
     "bin": "./bin/cli.js",
     "scripts": {
