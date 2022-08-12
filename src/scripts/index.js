@@ -2,7 +2,6 @@ let demo;
 
 function setup() {
     createCanvas(window.innerWidth, window.innerHeight);
-
     demo = new Demo();
 }
 
