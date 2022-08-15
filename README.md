@@ -1,4 +1,6 @@
-# p5js-Boilerplate
+# create-p5js-Boilerplate
+
+Initialise an instance of https://github.com/ZKitcher/p5js-Boilerplate
 
 -   Boilerplate to fork for an easy setup to start a P5js project.
 
