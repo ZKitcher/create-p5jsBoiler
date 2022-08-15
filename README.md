@@ -1,4 +1,4 @@
-# create-p5js-Boilerplate
+# create-p5jsBoiler
 
 Initialise an instance of https://github.com/ZKitcher/p5js-Boilerplate
 
