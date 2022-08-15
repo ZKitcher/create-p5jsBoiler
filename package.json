@@ -1,6 +1,6 @@
 {
     "name": "create-p5jsboiler",
-    "version": "0.1.17",
+    "version": "0.2.1",
     "bin": "./bin/cli.js",
     "homepage": "https://github.com/ZKitcher/create-p5jsBoiler",
     "repository": {
