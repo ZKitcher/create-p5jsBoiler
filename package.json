@@ -1,6 +1,6 @@
 {
     "name": "create-p5jsboiler",
-    "version": "0.2.11",
+    "version": "0.2.12",
     "bin": "./bin/cli.js",
     "homepage": "https://github.com/ZKitcher/p5js-Boilerplate",
     "repository": {
@@ -8,8 +8,8 @@
         "url": "https://github.com/ZKitcher/create-p5jsBoiler.git"
     },
     "scripts": {
-        "build": "node fileScraper.js",
-        "publishNPM": "npm publish --access=public"
+        "publishNPM": "npm publish --access=public",
+        "patchNPM": "npm version patch"
     },
     "keywords": [
         "p5js",
