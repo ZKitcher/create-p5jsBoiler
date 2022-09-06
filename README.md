@@ -1,6 +1,7 @@
 # create-p5jsBoiler
 
-Initialise an instance of https://github.com/ZKitcher/p5js-Boilerplate
+Initialise an instance of a stand alone p5js project mirroring:
+- https://github.com/ZKitcher/p5js-Boilerplate
 
 -   Boilerplate to clone for an easy setup to start a P5js project.
 
