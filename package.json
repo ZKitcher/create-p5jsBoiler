@@ -1,6 +1,6 @@
 {
     "name": "create-p5jsboiler",
-    "version": "0.2.12",
+    "version": "0.2.13",
     "bin": "./bin/cli.js",
     "homepage": "https://github.com/ZKitcher/p5js-Boilerplate",
     "repository": {
@@ -12,6 +12,7 @@
         "patchNPM": "npm version patch"
     },
     "keywords": [
+        "p5",
         "p5js",
         "p5js Boilerplate",
         "Boilerplate"
